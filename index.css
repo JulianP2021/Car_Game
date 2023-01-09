@@ -1,0 +1,12 @@
+canvas {
+    border-width: 5px;
+    border-style: groove;
+    border-color: black;
+  }
+  h1{
+    text-align: center;
+  }
+
+  body{
+    margin: 0%;
+  }
