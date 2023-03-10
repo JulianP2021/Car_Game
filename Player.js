@@ -6,12 +6,17 @@ class Player {
 	y = 0;
 	width = 0;
 	height = 0;
-	velocity = 0;
+	velocity = { x: 0, y: 0 };
+	moveSpeed = 0;
+	maxSpeed = 0;
+	acceleration = { x: 0, y: 0 };
+	nacceleration = { x: -1, y: -1 };
 	collided = 0;
 	roundcount = 0;
 	angle = 0;
 	ttl = 0;
 	model;
+	isDrifting = false;
 	claimed1 = false;
 	claimed2 = false;
 	claimed3 = false;
@@ -20,8 +25,22 @@ class Player {
 	claimed6 = false;
 	claimed7 = false;
 	claimed8 = false;
+	friction = 1;
 
-	constructor(startx, starty, width, height, velocity, collided, roundcount, ttl, model) {
+	constructor(
+		startx,
+		starty,
+		width,
+		height,
+		velocity,
+		moveSpeed,
+		maxSpeed,
+		nacceleration,
+		collided,
+		roundcount,
+		ttl,
+		model
+	) {
 		this.startx = startx;
 		this.starty = starty;
 		this.x = startx;
@@ -29,6 +48,9 @@ class Player {
 		this.width = width;
 		this.height = height;
 		this.velocity = velocity;
+		this.moveSpeed = moveSpeed;
+		this.maxSpeed = maxSpeed;
+		this.nacceleration = nacceleration;
 		this.collided = collided;
 		this.roundcount = roundcount;
 		this.ttl = ttl;
@@ -139,8 +161,8 @@ class Player {
 		let returnC = [];
 		for (let ray of rays) {
 			returnC[rays.indexOf(ray)] = [];
-			returnC[rays.indexOf(ray)][0] = ray.x-this.x;
-			returnC[rays.indexOf(ray)][1] = ray.y-this.y;
+			returnC[rays.indexOf(ray)][0] = ray.x - this.x;
+			returnC[rays.indexOf(ray)][1] = ray.y - this.y;
 		}
 		return returnC;
 	}
@@ -176,5 +198,38 @@ class Player {
 		}
 		newModel.setWeights(weightsCopy);
 		return newModel;
+	}
+
+	limitSpeed() {
+		let length = Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2);
+		if (Math.sqrt(length) > this.maxSpeed) {
+			this.velocity.x = (this.velocity.x / length) * this.maxSpeed;
+			this.velocity.y = (this.velocity.y / length) * this.maxSpeed;
+		}
+	}
+
+	lerp() {
+		let velolength =
+			Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2);
+		let acceleration_degree = Math.atan(
+			this.acceleration.y / this.acceleration.x
+		);
+		let velocity_degree = Math.atan(this.velocity.y / this.velocity.x);
+		let changed_degree =
+			(acceleration_degree - velocity_degree) * this.friction;
+		console.log(changed_degree);
+		if (
+			!isNaN(acceleration_degree) &&
+			!isNaN(velocity_degree) &&
+			changed_degree > 0.1 &&
+			changed_degree < -0.1 &&
+			!isNaN(changed_degree)
+		) {
+			console.log(acceleration_degree, velocity_degree);
+			this.velocity.x =
+				Math.cos(velocity_degree + changed_degree) * Math.sqrt(velolength);
+			this.velocity.y =
+				Math.sin(velocity_degree + changed_degree) * Math.sqrt(velolength);
+		}
 	}
 }

@@ -7,7 +7,7 @@ let createdTrack = false;
 let drawStart = false;
 let startx = 300;
 let starty = 130;
-tf.setBackend("cpu")
+tf.setBackend("cpu");
 
 function resizeCanvas() {
 	canvas.width = window.innerWidth - 10;
@@ -22,7 +22,20 @@ function createPlayer(weights) {
 }
 
 function createPlayerwithModel(model) {
-	return new Player(startx, starty, 20, 20, 3, false, 0, 10000, model);
+	return new Player(
+		startx,
+		starty,
+		10,
+		10,
+		{ x: 1, y: 1 },
+		0.2,
+		1,
+		{ x: -1, y: -1 },
+		false,
+		0,
+		1000,
+		model
+	);
 }
 window.addEventListener("resize", resizeCanvas);
 
@@ -53,28 +66,44 @@ rewards.push(new Reward(500, 100, 500, 200));
 //
 
 // Set up the player
-const player1 = new Player(200, 150, 20, 20, 0, false, 0, 1000, getBaseModel());
+const player1 = new Player(
+	400,
+	150,
+	10,
+	10,
+	{ x: 1, y: 1 },
+	0.1,
+	2,
+	{ x: -1, y: -1 },
+	false,
+	0,
+	Infinity,
+	getBaseModel()
+);
 
 let players = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 0; i++) {
 	players.push(createPlayer(getBaseModel().getWeights()));
 }
-//players.push(player1)
+players.push(player1);
 
 canvas.addEventListener("click", e => {
-	if (drawStart) {
-		startx = (e.offsetX / canvas.width) * 1000;
-		starty = (e.offsetY / canvas.width) * 1000;
-	} else {
-		ctx.beginPath();
-		ctx.arc(e.offsetX, e.offsetY, 20, 0, 2 * Math.PI);
-		ctx.fillStyle = "white";
-		ctx.fill();
+	if (!started) {
+		if (drawStart) {
+			startx = (e.offsetX / canvas.width) * 1000;
+			starty = (e.offsetY / canvas.width) * 1000;
+		} else {
+			ctx.beginPath();
+			ctx.arc(e.offsetX, e.offsetY, 20, 0, 2 * Math.PI);
+			ctx.fillStyle = "white";
+			ctx.fill();
+		}
+		createdTrack = true;
 	}
-	createdTrack = true;
 });
 
 players.push(player1);
+
 
 // Set up the key codes
 const keys = {
@@ -82,6 +111,7 @@ const keys = {
 	a: 65,
 	s: 83,
 	d: 68,
+	crtl: 16,
 };
 
 let features = [];
@@ -96,17 +126,28 @@ async function update() {
 		paintTrack();
 	}
 	for (let player of players) {
+		let wpressed = false;
+		let spressed = false;
+		let apressed = false;
+		let dpressed = false;
+		player.isDrifting = true;
 		if (!player.collided) {
 			// Update the player's position based on the key state
 			if (player == player1) {
 				if (keyState[keys.w]) {
-					player.velocity++;
+					wpressed = true;
+				}
+				if (keyState[keys.s]) {
+					spressed = true;
 				}
 				if (keyState[keys.a]) {
-					player.angle -= 0.2;
+					apressed = true;
 				}
 				if (keyState[keys.d]) {
-					player.angle += 0.2;
+					dpressed = true;
+				}
+				if (keyState[keys.crtl]) {
+					player.isDrifting = true;
 				}
 			} else {
 				let detection = player.detectEnvironment(matrix, canvas, ctx);
@@ -145,23 +186,47 @@ async function update() {
 						.dataSync()
 				);
 				/*if (prediction.lastIndexOf(Math.max(...prediction)) ==0) {
-					player.velocity++;
+					wpressed = true;
 				}*/
 				if (prediction.lastIndexOf(Math.max(...prediction)) == 0) {
-					player.angle -= 0.2;
+					apressed = true;
 				}
 				if (prediction.lastIndexOf(Math.max(...prediction)) == 1) {
-					player.angle += 0.2;
+					dpressed = true;
 				}
 				player.score++;
 			}
-			player.x += Math.cos(player.angle) * player.velocity; // Update the player's position
-			player.y += Math.sin(player.angle) * player.velocity;
-
-			player.velocity.x = 0;
-			player.velocity.y = 0;
-
-			detectCollision(player);
+			let drag = 0.98;
+			let inputVertical = wpressed ? 1 : 0;
+			inputVertical = spressed ? -1 : inputVertical;
+			let inputHorizontal = apressed ? -1 : 0;
+			inputHorizontal = dpressed ? 1 : inputHorizontal;
+			let move = { x: 0, y: 0 };
+			let friction = 1;
+			if (player.isDrifting) {
+				friction = 0.4
+				player.acceleration.x = player.moveSpeed * inputVertical * Math.cos(player.angle);
+				player.acceleration.y = player.moveSpeed * inputVertical * Math.sin(player.angle);
+				player.velocity.x += player.acceleration.x
+				player.velocity.x *= drag
+				player.velocity.y += player.acceleration.y
+				player.velocity.y *= drag
+				player.angle += inputHorizontal * 0.02;
+				player.limitSpeed()
+				player.lerp();
+				move.x += player.velocity.x;
+				move.y += player.velocity.y;
+			} else {
+				console.error("AHA");
+				//player.velocity.x = player.maxSpeed;
+				//player.velocity.y = player.maxSpeed;
+				move.x = player.velocity.x * Math.cos(player.angle);
+				move.y = player.velocity.y * Math.sin(player.angle);
+				player.angle += inputHorizontal * 0.2;
+			}
+			player.x += move.x; // Update the player's position
+			player.y += move.y;
+			//detectCollision(player);
 			player.ttl--;
 			if (
 				player.claimed1 &&
@@ -188,7 +253,7 @@ async function update() {
 			return false;
 		}).length == 0
 	) {
-		nextGen2();
+		//nextGen2();
 	}
 	// Request the next animation frame
 	requestAnimationFrame(update);
@@ -196,8 +261,8 @@ async function update() {
 
 // Set up the keydown event listener
 window.addEventListener("keydown", async function (e) {
+	console.log("key down");
 	keyState[e.keyCode] = true;
-	console.log(e.keyCode);
 	if (e.key == "r") {
 		if (!started) {
 			createdMatrix = false;
@@ -230,6 +295,7 @@ weightsUpload.addEventListener("input", async ev => {
 
 // Set up the keyup event listener
 window.addEventListener("keyup", function (e) {
+	console.log("key up");
 	keyState[e.keyCode] = false;
 });
 
@@ -409,6 +475,17 @@ function drawCar(player) {
 	ctx.rotate(player.angle);
 
 	// Draw the car
+	/*var img = new Image();
+	img.src = "/img/car.png";
+	img.width = player.width;
+	img.height = player.height;
+	ctx.drawImage(
+		img,
+		((-player.width / 1000) * canvas.width) / 2,
+		((-player.height / 1000) * canvas.width) / 2,
+		(player.width / 1000) * canvas.width,
+		(player.height / 1000) * canvas.width
+	);*/
 	ctx.fillRect(
 		((-player.width / 1000) * canvas.width) / 2,
 		((-player.height / 1000) * canvas.width) / 2,
@@ -469,15 +546,15 @@ function mutate2(model) {
 	} else if (randomNumber > 0.3) {
 		model = addoneUnit(model);
 	}
-*/	let weightsCopy = [];
+*/ let weightsCopy = [];
 	model.weights.forEach(w => {
 		//console.log(w.val.dataSync());
 		const shape = w.val.shape;
 		const mutation = tf.randomNormal(shape, 0, 50);
-		weightsCopy.push(w.val.add(mutation))
+		weightsCopy.push(w.val.add(mutation));
 		//console.log(weightsCopy[weightsCopy.length-1].dataSync());
 	});
-	let newModel = getBaseModel()
+	let newModel = getBaseModel();
 	newModel.setWeights(weightsCopy);
 	/*
 	for(let i = 0;i<model.getWeights().length;i++){
@@ -513,7 +590,12 @@ function nextGen2() {
 		players = players.sort((a, b) => b.score - a.score);
 		let bestModel = players[0].copyModel();
 		ctx.fillStyle = "yellow";
-		ctx.fillRect(players[0].x*canvas.width/1000,players[0].y*canvas.width/1000,10,10)
+		ctx.fillRect(
+			(players[0].x * canvas.width) / 1000,
+			(players[0].y * canvas.width) / 1000,
+			10,
+			10
+		);
 		const breedingPopulation = players.slice(
 			0,
 			Math.ceil((players.length / 10) * 3)
@@ -536,14 +618,12 @@ function nextGen2() {
 			offspring.push(child);
 		}
 		let newPopulation = breedingPopulation.concat(offspring);
-
 		players = [];
 		players.push(createPlayerwithModel(bestModel));
 		for (let i = 0; i < newPopulation.length - 1; i++) {
 			players.push(createPlayerwithModel(mutate2(newPopulation[i].model)));
 		}
 	});
-
 }
 
 function crossover(parent1, parent2) {
