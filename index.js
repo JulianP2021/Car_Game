@@ -71,10 +71,10 @@ const player1 = new Player(
 	150,
 	10,
 	10,
-	{ x: 1, y: 1 },
+	{ x: 0, y: 0 },
 	0.1,
 	2,
-	{ x: -1, y: -1 },
+	{ x: 0, y: 0 },
 	false,
 	0,
 	Infinity,
@@ -86,6 +86,11 @@ for (let i = 0; i < 0; i++) {
 	players.push(createPlayer(getBaseModel().getWeights()));
 }
 players.push(player1);
+
+player1.velocity = {x: 1.2, y: 1.2}
+player1.acceleration = {x: 1.0, y: 0.95}
+player1.lerp(1)
+console.log(player1.velocity);
 
 canvas.addEventListener("click", e => {
 	if (!started) {
@@ -204,25 +209,17 @@ async function update() {
 			let move = { x: 0, y: 0 };
 			let friction = 1;
 			if (player.isDrifting) {
-				friction = 0.4
 				player.acceleration.x = player.moveSpeed * inputVertical * Math.cos(player.angle);
 				player.acceleration.y = player.moveSpeed * inputVertical * Math.sin(player.angle);
 				player.velocity.x += player.acceleration.x
 				player.velocity.x *= drag
 				player.velocity.y += player.acceleration.y
 				player.velocity.y *= drag
-				player.angle += inputHorizontal * 0.02;
+				player.angle += inputHorizontal * 0.04;
 				player.limitSpeed()
-				player.lerp();
+				player.lerp(1);
 				move.x += player.velocity.x;
 				move.y += player.velocity.y;
-			} else {
-				console.error("AHA");
-				//player.velocity.x = player.maxSpeed;
-				//player.velocity.y = player.maxSpeed;
-				move.x = player.velocity.x * Math.cos(player.angle);
-				move.y = player.velocity.y * Math.sin(player.angle);
-				player.angle += inputHorizontal * 0.2;
 			}
 			player.x += move.x; // Update the player's position
 			player.y += move.y;
@@ -261,7 +258,7 @@ async function update() {
 
 // Set up the keydown event listener
 window.addEventListener("keydown", async function (e) {
-	console.log("key down");
+	console.log("key down", e.key);
 	keyState[e.keyCode] = true;
 	if (e.key == "r") {
 		if (!started) {

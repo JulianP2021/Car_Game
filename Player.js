@@ -25,7 +25,6 @@ class Player {
 	claimed6 = false;
 	claimed7 = false;
 	claimed8 = false;
-	friction = 1;
 
 	constructor(
 		startx,
@@ -203,33 +202,53 @@ class Player {
 	limitSpeed() {
 		let length = Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2);
 		if (Math.sqrt(length) > this.maxSpeed) {
-			this.velocity.x = (this.velocity.x / length) * this.maxSpeed;
-			this.velocity.y = (this.velocity.y / length) * this.maxSpeed;
+			this.velocity.x = (this.velocity.x / Math.sqrt(length)) * this.maxSpeed;
+			this.velocity.y = (this.velocity.y / Math.sqrt(length)) * this.maxSpeed;
+			console.log("LIMIT!");
 		}
 	}
 
-	lerp() {
-		let velolength =
-			Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2);
-		let acceleration_degree = Math.atan(
-			this.acceleration.y / this.acceleration.x
+	lerp(friction) {
+		/*let velolength = Math.sqrt(
+			Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2)
 		);
-		let velocity_degree = Math.atan(this.velocity.y / this.velocity.x);
-		let changed_degree =
-			(acceleration_degree - velocity_degree) * this.friction;
-		console.log(changed_degree);
-		if (
-			!isNaN(acceleration_degree) &&
-			!isNaN(velocity_degree) &&
-			changed_degree > 0.1 &&
-			changed_degree < -0.1 &&
-			!isNaN(changed_degree)
-		) {
-			console.log(acceleration_degree, velocity_degree);
+		let accelarationlength = Math.sqrt(
+			Math.pow(this.acceleration.x, 2) + Math.pow(this.acceleration.y, 2)
+		);
+		if (accelarationlength != 0 && velolength != 0) {
+			let acceleration_degree = Math.asin(
+				this.acceleration.y / accelarationlength
+			);
+			let velocity_degree = Math.asin(this.velocity.y / velolength);
+			console.log(
+				accelarationlength,
+				velolength,
+				Math.asin(this.velocity.y / velolength),
+				this.velocity.y,
+				velolength
+			);
+			let changed_degree = acceleration_degree - velocity_degree;
 			this.velocity.x =
-				Math.cos(velocity_degree + changed_degree) * Math.sqrt(velolength);
+				this.velocity.x * (1 - friction) +
+				Math.cos(velocity_degree) * velolength * friction;
 			this.velocity.y =
-				Math.sin(velocity_degree + changed_degree) * Math.sqrt(velolength);
+				this.velocity.y * (1 - friction) +
+				Math.sin(velocity_degree) * velolength * friction;
+		}*/
+
+		let velolength = Math.sqrt(
+			Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.y, 2)
+		);
+		let accelarationlength = Math.sqrt(
+			Math.pow(this.acceleration.x, 2) + Math.pow(this.acceleration.y, 2)
+		);
+		if (velolength != 0 && accelarationlength != 0) {
+			let delta_X =
+				this.acceleration.x / accelarationlength - this.velocity.x / velolength;
+			let delta_Y =
+				this.acceleration.y / accelarationlength - this.velocity.y / velolength;
+			this.velocity.x = this.velocity.x + friction * delta_X * velolength;
+			this.velocity.y = this.velocity.y + friction * delta_Y * velolength;
 		}
 	}
 }
