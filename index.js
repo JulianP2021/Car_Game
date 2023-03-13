@@ -82,14 +82,10 @@ const player1 = new Player(
 );
 
 let players = [];
-for (let i = 0; i < 0; i++) {
-	players.push(createPlayer(getBaseModel().getWeights()));
-}
-players.push(player1);
 
-player1.velocity = {x: 1.2, y: 1.2}
-player1.acceleration = {x: 1.0, y: 0.95}
-player1.lerp(1)
+player1.velocity = { x: 1.2, y: 1.2 };
+player1.acceleration = { x: 1.0, y: 0.95 };
+player1.lerp(1);
 console.log(player1.velocity);
 
 canvas.addEventListener("click", e => {
@@ -108,7 +104,6 @@ canvas.addEventListener("click", e => {
 });
 
 players.push(player1);
-
 
 // Set up the key codes
 const keys = {
@@ -209,14 +204,16 @@ async function update() {
 			let move = { x: 0, y: 0 };
 			let friction = 1;
 			if (player.isDrifting) {
-				player.acceleration.x = player.moveSpeed * inputVertical * Math.cos(player.angle);
-				player.acceleration.y = player.moveSpeed * inputVertical * Math.sin(player.angle);
-				player.velocity.x += player.acceleration.x
-				player.velocity.x *= drag
-				player.velocity.y += player.acceleration.y
-				player.velocity.y *= drag
+				player.acceleration.x =
+					player.moveSpeed * inputVertical * Math.cos(player.angle);
+				player.acceleration.y =
+					player.moveSpeed * inputVertical * Math.sin(player.angle);
+				player.velocity.x += player.acceleration.x;
+				player.velocity.x *= drag;
+				player.velocity.y += player.acceleration.y;
+				player.velocity.y *= drag;
 				player.angle += inputHorizontal * 0.04;
-				player.limitSpeed()
+				player.limitSpeed();
 				player.lerp(1);
 				move.x += player.velocity.x;
 				move.y += player.velocity.y;
@@ -263,6 +260,7 @@ window.addEventListener("keydown", async function (e) {
 	if (e.key == "r") {
 		if (!started) {
 			createdMatrix = false;
+			start();
 			update();
 			started = true;
 		}
@@ -309,6 +307,13 @@ function paintMatrix() {
 			ctx.fillRect((i * canvas.width) / 1000, (j * canvas.width) / 1000, 1, 1);
 		}
 	}
+}
+
+function start() {
+	for (let i = 0; i < document.getElementById("PlayerAmount").value; i++) {
+		players.push(createPlayer(getBaseModel().getWeights()));
+	}
+	players.push(player1);
 }
 
 function paintTrack() {
