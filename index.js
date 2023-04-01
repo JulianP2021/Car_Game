@@ -42,7 +42,7 @@ window.addEventListener("resize", resizeCanvas);
 // Initialize the canvas size
 resizeCanvas();
 
-let MOVES = ["A", "D", "-"];
+let MOVES = ["A", "D", "W"];
 let rewards = [];
 let matrix = [];
 for (let i = 0; i < 1000; i++) {
@@ -71,10 +71,10 @@ const player1 = new Player(
 	150,
 	10,
 	10,
-	{ x: 0, y: 0 },
+	{ x: 1, y: 1 },
 	0.1,
 	2,
-	{ x: 0, y: 0 },
+	{ x: -1, y: -1 },
 	false,
 	0,
 	Infinity,
@@ -185,13 +185,13 @@ async function update() {
 						)
 						.dataSync()
 				);
-				/*if (prediction.lastIndexOf(Math.max(...prediction)) ==0) {
-					wpressed = true;
-				}*/
 				if (prediction.lastIndexOf(Math.max(...prediction)) == 0) {
-					apressed = true;
+					wpressed = true;
 				}
 				if (prediction.lastIndexOf(Math.max(...prediction)) == 1) {
+					apressed = true;
+				}
+				if (prediction.lastIndexOf(Math.max(...prediction)) == 2) {
 					dpressed = true;
 				}
 				player.score++;
@@ -220,7 +220,7 @@ async function update() {
 			}
 			player.x += move.x; // Update the player's position
 			player.y += move.y;
-			//detectCollision(player);
+			detectCollision(player);
 			player.ttl--;
 			if (
 				player.claimed1 &&
@@ -247,7 +247,7 @@ async function update() {
 			return false;
 		}).length == 0
 	) {
-		//nextGen2();
+		nextGen2();
 	}
 	// Request the next animation frame
 	requestAnimationFrame(update);
@@ -418,6 +418,10 @@ function paintTrack() {
 	}
 }
 function detectCollision(player) {
+	if (player.velocity == 0) {
+		player.collided = true;
+		player.ttl = 0;
+	}
 	let positions = [];
 	positions[0] = [player.x - 1, player.y - 1];
 
@@ -663,7 +667,7 @@ function getBaseModel() {
 			}),
 			tf.layers.dense({
 				units: MOVES.length,
-				activation: "softmax",
+				activation: "relu",
 				kernelInitializer: "randomNormal",
 			}),
 		],
