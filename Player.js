@@ -171,10 +171,12 @@ class Player {
 		this.y = this.starty;
 		this.score = 0;
 		this.collided = false;
-		this.claimed1 = false;
 		this.angle = 0;
+		this.roundcount = 0;
+		this.velocity = { x: 0, y: 0 };
+		this.acceleration = { x: 0, y: 0 };
+		this.ttl = Infinity
 		this.resetRewards();
-		return this;
 	}
 
 	copyModelWeights() {

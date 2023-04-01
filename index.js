@@ -71,7 +71,7 @@ const player1 = new Player(
 	150,
 	10,
 	10,
-	{ x: 1, y: 1 },
+	{ x: 0, y: 0 },
 	0.1,
 	2,
 	{ x: -1, y: -1 },
@@ -83,8 +83,8 @@ const player1 = new Player(
 
 let players = [];
 
-player1.velocity = { x: 1.2, y: 1.2 };
-player1.acceleration = { x: 1.0, y: 0.95 };
+//player1.velocity = { x: 1.2, y: 1.2 };
+//player1.acceleration = { x: 1.0, y: 0.95 };
 player1.lerp(1);
 console.log(player1.velocity);
 
@@ -247,7 +247,10 @@ async function update() {
 			return false;
 		}).length == 0
 	) {
-		nextGen2();
+		if (document.getElementById("PlayerAmount").value != 0) {
+			nextGen2();
+		}
+		player1.reset();
 	}
 	// Request the next animation frame
 	requestAnimationFrame(update);
@@ -310,8 +313,10 @@ function paintMatrix() {
 }
 
 function start() {
-	for (let i = 0; i < document.getElementById("PlayerAmount").value; i++) {
-		players.push(createPlayer(getBaseModel().getWeights()));
+	if (document.getElementById("PlayerAmount").value != 0) {
+		for (let i = 0; i < document.getElementById("PlayerAmount").value; i++) {
+			players.push(createPlayer(getBaseModel().getWeights()));
+		}
 	}
 	players.push(player1);
 }
