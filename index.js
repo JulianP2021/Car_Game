@@ -27,7 +27,7 @@ function createPlayerwithModel(model) {
 		starty,
 		10,
 		10,
-		{ x: 1, y: 1 },
+		{ x: 1, y: 0 },
 		0.2,
 		1,
 		{ x: -1, y: -1 },
