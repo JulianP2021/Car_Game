@@ -1,33 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
-		<link rel="stylesheet" href="index.css" />
-		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
-	</head>
-	<body>
-		<h1>Car-Game</h1>
-		<p id="rc">Roundcount: 0</p>
-		<div id="loadModel" style="display: none">
-			<label for="avatar">Choose a .json file for your model:</label>
-			<input type="file" id="json-upload" accept=".json" />
-			<label for="avatar">Choose a .bin file for your model:</label>
-			<input type="file" id="weights-upload" accept=".bin" />
-		</div>
-		Press r to start,
-		Press f to draw,
-		Press l to load a model,
-		Press g to save a model,
-		Use w,a,s,d to steer the car,
-		Please enter the Botamount<input type="number" id = "PlayerAmount" value="0">
-		<canvas id="canvas" willReadFrequently></canvas>
-		<script src="Ray.js"></script>
-		<script src="Reward.js"></script>
-		<script src="Player.js"></script>
-		<script src="index.js"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
+  </head>
+  <body>
+    <h1>Car-Game</h1>
+    <p id="rc">Roundcount: 0</p>
+    
+    <!--<div id="loadModel" style="display: none">
+      <label for="avatar">Choose a .json file for your model:</label>
+      <input type="file" id="json-upload" accept=".json" />
+      <label for="avatar">Choose a .bin file for your model:</label>
+      <input type="file" id="weights-upload" accept=".bin" />
+    </div>-->
+    
+    Press r to start,<!--Press f to draw, Press l to load a model, Press g to save
+    a model, --> w,a,s,d to steer the car<!--, Please enter the Botamount<input
+      type="number"
+      id="PlayerAmount"
+      value="0"
+    />-->
+    <canvas id="canvas" willReadFrequently></canvas>
+    <script src="AI.js"></script>
+    <script src="OldAI_1.js"></script>
+    <script src="OldAI_2.js"></script>
+    <script src="Ray.js"></script>
+    <script src="Reward.js"></script>
+    <script src="Player.js"></script>
+    <script src="index.js"></script>
+  </body>
 </html>
